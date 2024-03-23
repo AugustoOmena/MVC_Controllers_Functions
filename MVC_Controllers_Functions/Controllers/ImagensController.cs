@@ -4,12 +4,13 @@ namespace MVC_Controllers_Functions.Controllers
 {
     public class ImagensController : Controller
     {
-        private string caminhoServidor;
+        private readonly string _caminhoServidor;
 
-        public ImagensController(IWebHostEnvironment sistema) 
+        public ImagensController(IWebHostEnvironment sistema)
         {
-            caminhoServidor = sistema.WebRootPath;
+            _caminhoServidor = Path.Combine(sistema.WebRootPath, "imagem");
         }
+
         public IActionResult Upload()
         {
             return View();
@@ -18,7 +19,12 @@ namespace MVC_Controllers_Functions.Controllers
         [HttpPost]
         public IActionResult Upload(IFormFile foto)
         {
-            string caminhoParaSalvarImagem = caminhoServidor + "\\imagem\\";
+            if (!(foto != null && foto.Length > 0))
+            {
+                return RedirectToAction("Upload");
+            }
+
+            string caminhoParaSalvarImagem = _caminhoServidor + "\\imagem\\";
             string novoNomeParaImagem = Guid.NewGuid().ToString() + foto.FileName;
 
             if (!Directory.Exists(caminhoParaSalvarImagem))
@@ -26,12 +32,19 @@ namespace MVC_Controllers_Functions.Controllers
                 Directory.CreateDirectory(caminhoParaSalvarImagem);
             }
 
-            using (var stream = System.IO.File.Create(caminhoParaSalvarImagem + novoNomeParaImagem))
+            string[] tiposDeImagemPermitidos = { ".jpg", ".jpeg", ".png", ".gif" };
+            string extensao = Path.GetExtension(foto.FileName).ToLower();
+
+            if (tiposDeImagemPermitidos.Contains(extensao))
             {
-                foto.CopyToAsync(stream);
+                using (var stream = System.IO.File.Create(caminhoParaSalvarImagem + novoNomeParaImagem))
+                {
+                    foto.CopyToAsync(stream);
+                }
             }
 
             return RedirectToAction("Upload");
         }
     }
+    
 }
