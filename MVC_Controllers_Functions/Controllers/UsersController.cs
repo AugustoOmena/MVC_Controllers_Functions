@@ -42,6 +42,11 @@ namespace MVC_Controllers_Functions.Controllers
                 return NotFound();
             }
 
+            if (user.UserImage.StartsWith("/Users/Details"))
+            {
+                user.UserImage = "/Users" + user.UserImage;
+            }
+
             return View(user);
         }
 
@@ -85,7 +90,7 @@ namespace MVC_Controllers_Functions.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                user.UserImage = Path.Combine("imagem", "Userimagem", novoNomeParaImagem);
+                user.UserImage = Path.Combine("/imagem/Userimagem", novoNomeParaImagem); // Caminho absoluto relativo a wwwroot
 
                 _context.Add(user);
                 await _context.SaveChangesAsync();
@@ -111,8 +116,6 @@ namespace MVC_Controllers_Functions.Controllers
         }
 
         // POST: Users/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Email,UserImage")] User user)
